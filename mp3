@@ -1,0 +1,56 @@
+# This script
+# - reads a video URL from the clipboard
+# - converts it to mp3
+# - normalizes its loudness and
+# - saves it to the user's Music folder.
+#
+# Usage:
+# - copy a Youtube video URL with Ctrl+C
+# - open a terminal and run this script
+# - adjust the output file name if you must
+#
+#
+# Installation:
+# This script requires a number of tools, install them with:
+#   sudo apt install xclip youtube-dl ffmpeg
+#
+# Install the Go programming language, e.g. with:
+#   sudo apt install go
+# or
+#   sudo apt install golang
+# and after that get the normalize tool with go get:
+#   go get github.com/gonutz/normalize
+#
+# Make sure you have the normalize tool in your PATH.
+# You will likely need to update your PATH to include Go's bin folder.
+#
+# xclip reads the clipboard under Linux.
+# youtube-dl downloads Youtube videos.
+# ffmpeg converts videos to mp3 files.
+# normalize makes mp3 files have the same loudness.
+
+
+# Always save to the user's Music folder.
+cd ~/Music
+
+# Copy the clipboard's content into $url.
+url=`xclip -selection c -o`
+
+# Let youtube-dl tell us what its output name will be, this defaults to <video title>.mp3.
+filename=`youtube-dl --get-filename --extract-audio --audio-format mp3 --output "%(title)s.mp3" $url` || exit 1
+
+# The user can change the output name, e.g. instead of
+#   "Bjork - We Will Rock You [Original Video].mp3"
+# we might want to change it to
+#   "Bjork - We Will Rock You.mp3"
+read -p "Title: " -i "$filename" -e final_filename
+
+# Download and convert the video, youtube-dl will use ffmpeg which is why we need to install that.
+youtube-dl --extract-audio --audio-format mp3 --output "%(title)s.%(ext)s" $url
+
+# -ampl is an amplitude value with no physical unit. Double it to be twice as loud.
+normalize -ampl=3000 "$filename"
+
+# Rename the file to what the user entered.
+mv "$filename" "$final_filename"
+
