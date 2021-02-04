@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # This script
 # - reads a video URL from the clipboard
 # - converts it to mp3
@@ -37,7 +39,7 @@ cd ~/Music
 url=`xclip -selection c -o`
 
 # Let youtube-dl tell us what its output name will be, this defaults to <video title>.mp3.
-filename=`youtube-dl --get-filename --extract-audio --audio-format mp3 --output "%(title)s.mp3" $url` || exit 1
+filename=`youtube-dl --get-filename --extract-audio --audio-format mp3 --output "%(title)s.mp3" $url` || { read -p "Press [ENTER] to exit"; exit 1; }
 
 # The user can change the output name, e.g. instead of
 #   "Bjork - We Will Rock You [Original Video].mp3"
